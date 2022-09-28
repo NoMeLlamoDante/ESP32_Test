@@ -19,6 +19,7 @@ PubSubClient client(espClient);
 
 void setup()
 { Serial.begin(9600);
+  //Conectar Wifi
   WiFi.begin(ssid, password);
   Serial.println("...................................");
 
@@ -30,6 +31,8 @@ void setup()
 
   Serial.println("Conectado a Wifi");
   client.setServer(mqttServer, mqttPort);
+
+  //Conectar Broker
   while (!client.connected()){
     Serial.println("Conectando al broker MQTT...");
     if (client.connect("mqttx_54d756f3", mqttUser, mqttPassword ))
@@ -41,6 +44,11 @@ void setup()
     }
   }
 }
+
 void loop() {
-  // put your main code here, to run repeatedly:
+  client.loop();
+    
+
+  client.publish("dante_prueba/esp_32",String(millis()).c_str());
+  delay(500);
 }
