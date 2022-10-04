@@ -2,8 +2,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h> //MQTT
-#include <NTPClient.h>  //Time
-#include <WiFiUdp.h>  //Wifi - Time
+#include <time.h>
+//SD
 #include <FS.h>
 #include <SD.h>
 #include <SPI.h>
@@ -18,14 +18,17 @@ const int mqttPort = 1883;
 const char* mqttUser = "";
 const char* mqttPassword = "";
 //Time Data
-const long utcOffsetInSeconds = -18000;
+//const long utcOffsetInSeconds = -18000;
 
 //Data Lib
 WiFiClient espClient;
 PubSubClient client(espClient);
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "mx.pool.ntp.org",utcOffsetInSeconds);
 
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = -21000;
+const int   daylightOffset_sec = 3600;
+
+void printLocalTime();
 
 void setup(){
   Serial.begin(9600);
@@ -38,9 +41,11 @@ void setup(){
   }
   Serial.println("Conectado a Wifi");
   //Time
-  client.setServer(mqttServer, mqttPort);
-  timeClient.begin();
+  // Init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  printLocalTime();
   //Conectar Broker
+  client.setServer(mqttServer, mqttPort);
   while (!client.connected()){
     Serial.println("Conectando al broker MQTT...");
     if (client.connect("mqttx_54d756f3", mqttUser, mqttPassword ))
@@ -85,11 +90,9 @@ void loop() {
   client.loop();
   client.publish("dante_prueba/esp_32",String(millis()).c_str());
   //Time
-  timeClient.update();
-  Serial.println(timeClient.getFormattedTime());
-  delay(1000);
+  printLocalTime();
   //SD
-  File file = SD.open("/datalog.txt", FILE_WRITE);
+  /*File file = SD.open("/datalog.txt", FILE_APPEND);
   if(!file){
     Serial.println("Failed to open file for writing");
     return;
@@ -100,4 +103,15 @@ void loop() {
     Serial.println("Write failed");
   }
   file.close();
+*/
+  delay(1000);
+}
+
+void printLocalTime(){
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
