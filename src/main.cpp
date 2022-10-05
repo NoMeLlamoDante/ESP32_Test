@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h> //MQTT
 #include <time.h>
+#include <LiquidCrystal_I2C.h>
 //SD
 #include <FS.h>
 #include <SD.h>
@@ -25,7 +26,7 @@ const char* mqttPassword = "";
 //Data Lib
 WiFiClient espClient;
 PubSubClient client(espClient);
-
+LiquidCrystal_I2C lcd(0x27,16,2);
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = -21000;
 const int   daylightOffset_sec = 3600;
@@ -57,6 +58,9 @@ void setup(){
       Serial.print(client.state());
       delay(2000);
     }
+    //Pantallas
+    lcd.init();
+    lcd.backlight();
   }
   //SD Mount
   Serial.println("Verificando Micro SD");
@@ -115,5 +119,10 @@ void printLocalTime(){
     Serial.println("Failed to obtain time");
     return;
   }
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+  lcd.clear();
+  //lcd.print(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+  lcd.print(&timeinfo, "%B %d %Y");
+  lcd.setCursor(0,1);
+  lcd.print(&timeinfo, "%H:%M:%S");
+
 }

@@ -1,6 +1,6 @@
 //I2C
-#define pin_SDA 27
-#define pin_SCL 14
+#define pin_SDA 33
+#define pin_SCL 32
 //OUTPUT
 //Monedero
 //#define pin_
