@@ -8,6 +8,8 @@
 #include <SD.h>
 #include <SPI.h>
 
+#include "pin.h"
+
 //Data
 //Wifi Data
 const char* ssid = "IZZI-0CC8";
